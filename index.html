@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#143d2a" />
+  <meta name="description" content="Every Cent is a private, guided personal money tracker for understanding where your money goes and whether it is worth it." />
+  <title>Every Cent — Money Tracker</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">PERSONAL MONEY COMMAND CENTRE</p>
+        <h1>Every Cent</h1>
+        <p class="tagline">Know what you have. Know where it went. Decide if it was worth it.</p>
+      </div>
+      <button class="icon-button" id="helpButton" aria-label="Open help">?</button>
+    </header>
+
+    <nav class="primary-nav" aria-label="Main navigation">
+      <button class="nav-button active" data-view="dashboard">Home</button>
+      <button class="nav-button" data-view="transactions">Money</button>
+      <button class="nav-button" data-view="subscriptions">Subscriptions</button>
+      <button class="nav-button" data-view="accounts">Accounts</button>
+      <button class="nav-button" data-view="review">Review</button>
+    </nav>
+
+    <main>
+      <section class="view active" id="dashboardView" data-view="dashboard">
+        <div class="hero-grid">
+          <article class="hero-card balance-card">
+            <span class="card-label">Money position</span>
+            <strong class="hero-number" id="netWorthValue">$0.00</strong>
+            <span class="muted" id="netWorthHint">Add your accounts to begin.</span>
+          </article>
+          <article class="hero-card waste-card">
+            <span class="card-label">Potential waste this month</span>
+            <strong class="hero-number" id="wasteMonthValue">$0.00</strong>
+            <span class="muted" id="wasteMonthHint">Items you marked Waste or Unsure.</span>
+          </article>
+        </div>
+
+        <section class="panel action-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">TELL THE APP WHAT HAPPENED</p>
+              <h2>What happened with your money?</h2>
+            </div>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-action spend" data-quick="expense">
+              <span class="quick-icon">−</span>
+              <span><b>I spent money</b><small>Purchase, bill, cash spend</small></span>
+            </button>
+            <button class="quick-action income" data-quick="income">
+              <span class="quick-icon">+</span>
+              <span><b>I received money</b><small>Pension, refund, income</small></span>
+            </button>
+            <button class="quick-action transfer" data-quick="transfer">
+              <span class="quick-icon">⇄</span>
+              <span><b>I moved money</b><small>Transfer between my accounts</small></span>
+            </button>
+            <button class="quick-action account" id="quickAddAccount">
+              <span class="quick-icon">◎</span>
+              <span><b>Add what I own or owe</b><small>Bank, cash, card, loan</small></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Monthly summary">
+          <article class="stat-card"><span>Income this month</span><strong id="incomeMonth">$0.00</strong></article>
+          <article class="stat-card"><span>Spent this month</span><strong id="spentMonth">$0.00</strong></article>
+          <article class="stat-card"><span>Money left this month</span><strong id="cashflowMonth">$0.00</strong></article>
+          <article class="stat-card"><span>Active subscriptions / year</span><strong id="subscriptionYear">$0.00</strong></article>
+        </section>
+
+        <section class="panel" id="attentionPanel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">NEEDS ATTENTION</p>
+              <h2>Things to check</h2>
+            </div>
+            <span class="pill danger" id="attentionCount">0</span>
+          </div>
+          <div id="attentionList" class="stack-list empty-state">Nothing needs attention yet.</div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">RECENT</p>
+              <h2>Latest money movements</h2>
+            </div>
+            <button class="text-button" data-view-link="transactions">See all</button>
+          </div>
+          <div id="recentTransactions" class="stack-list empty-state">No transactions recorded yet.</div>
+        </section>
+      </section>
+
+      <section class="view" id="transactionsView" data-view="transactions">
+        <div class="section-heading sticky-heading">
+          <div>
+            <p class="eyebrow">EVERY CENT OUT, IN, OR MOVED</p>
+            <h2>Money</h2>
+          </div>
+          <button class="primary-button" id="addTransactionButton">+ Add</button>
+        </div>
+
+        <section class="panel filters-panel">
+          <div class="filter-grid">
+            <label>Show
+              <select id="transactionTypeFilter">
+                <option value="all">Everything</option>
+                <option value="expense">Spent</option>
+                <option value="income">Received</option>
+                <option value="transfer">Moved</option>
+              </select>
+            </label>
+            <label>Search
+              <input id="transactionSearch" type="search" placeholder="Shop, bill, note…" />
+            </label>
+          </div>
+        </section>
+
+        <div id="transactionList" class="stack-list large-list empty-state">No transactions yet.</div>
+      </section>
+
+      <section class="view" id="subscriptionsView" data-view="subscriptions">
+        <div class="section-heading sticky-heading">
+          <div>
+            <p class="eyebrow">SUBSCRIPTION RESCUE</p>
+            <h2>Recurring payments</h2>
+          </div>
+          <button class="primary-button" id="addSubscriptionButton">+ Add</button>
+        </div>
+
+        <section class="rescue-banner">
+          <div>
+            <p class="eyebrow">I DON'T KNOW WHAT I SIGNED UP FOR</p>
+            <h3>Subscription Rescue</h3>
+            <p>Record anything you recognise from your bank or email. Mark it <b>Unknown</b> and it stays on your attention list until you resolve it.</p>
+          </div>
+          <button class="secondary-button" id="startRescueButton">Start rescue</button>
+        </section>
+
+        <section class="stats-grid compact">
+          <article class="stat-card"><span>Active monthly equivalent</span><strong id="subscriptionMonthly">$0.00</strong></article>
+          <article class="stat-card"><span>Active annual cost</span><strong id="subscriptionAnnual">$0.00</strong></article>
+          <article class="stat-card"><span>Possible annual cuts</span><strong id="subscriptionCuts">$0.00</strong></article>
+          <article class="stat-card"><span>Needs checking</span><strong id="subscriptionUnknownCount">0</strong></article>
+        </section>
+
+        <div id="subscriptionList" class="stack-list large-list empty-state">No recurring payments recorded yet.</div>
+      </section>
+
+      <section class="view" id="accountsView" data-view="accounts">
+        <div class="section-heading sticky-heading">
+          <div>
+            <p class="eyebrow">WHAT YOU OWN AND WHAT YOU OWE</p>
+            <h2>Accounts</h2>
+          </div>
+          <button class="primary-button" id="addAccountButton">+ Add</button>
+        </div>
+
+        <section class="stats-grid compact">
+          <article class="stat-card"><span>Assets</span><strong id="assetsTotal">$0.00</strong></article>
+          <article class="stat-card"><span>Debts</span><strong id="debtsTotal">$0.00</strong></article>
+          <article class="stat-card"><span>Net position</span><strong id="netPositionTotal">$0.00</strong></article>
+        </section>
+        <div id="accountList" class="stack-list large-list empty-state">Add your bank account, savings, cash, credit card or loan.</div>
+      </section>
+
+      <section class="view" id="reviewView" data-view="review">
+        <div class="section-heading sticky-heading">
+          <div>
+            <p class="eyebrow">IS IT WORTH IT?</p>
+            <h2>Money review</h2>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">THIS MONTH</p>
+              <h3>Your spending judgement</h3>
+            </div>
+          </div>
+          <div id="worthBreakdown" class="worth-breakdown"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">WHERE IT WENT</p>
+              <h3>Spending by category</h3>
+            </div>
+          </div>
+          <div id="categoryBreakdown" class="bar-list empty-state">No spending to review yet.</div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">PROTECT MY MONEY</p>
+              <h3>Before another recurring purchase</h3>
+            </div>
+          </div>
+          <div class="protection-copy">
+            <p>Before you approve a new subscription, calculate the real annual cost and decide whether it is genuinely useful.</p>
+            <div class="annualiser">
+              <label>Subscription amount
+                <input type="number" min="0" step="0.01" id="protectAmount" placeholder="34.00" />
+              </label>
+              <label>How often?
+                <select id="protectCycle">
+                  <option value="monthly">Monthly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="fortnightly">Fortnightly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </label>
+              <div class="annual-result">
+                <span>Real yearly cost</span>
+                <strong id="protectAnnual">$0.00</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">YOUR DATA</p>
+              <h3>Backup and export</h3>
+            </div>
+          </div>
+          <div class="button-row">
+            <button class="secondary-button" id="backupButton">Download backup</button>
+            <button class="secondary-button" id="restoreButton">Restore backup</button>
+            <button class="secondary-button" id="exportCsvButton">Export transactions CSV</button>
+          </div>
+          <input type="file" id="restoreInput" accept="application/json" hidden />
+          <p class="muted small-copy">This version stores your data in this browser on this device. Keep backups if the information matters to you.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="transactionDialog" class="app-dialog">
+    <form method="dialog" id="transactionForm">
+      <div class="dialog-header">
+        <div><p class="eyebrow">MONEY ENTRY</p><h2 id="transactionDialogTitle">Add money movement</h2></div>
+        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
+      </div>
+      <input type="hidden" id="transactionId" />
+      <div class="segmented" role="group" aria-label="Transaction type">
+        <button type="button" data-type-choice="expense" class="selected">Spent</button>
+        <button type="button" data-type-choice="income">Received</button>
+        <button type="button" data-type-choice="transfer">Moved</button>
+      </div>
+      <input type="hidden" id="transactionType" value="expense" />
+      <div class="form-grid">
+        <label>Amount
+          <div class="money-input"><span>$</span><input id="transactionAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" /></div>
+        </label>
+        <label>Date
+          <input id="transactionDate" type="date" required />
+        </label>
+        <label class="full">What was it?
+          <input id="transactionMerchant" type="text" maxlength="80" placeholder="Groceries, pension, transfer…" required />
+        </label>
+        <label>Category
+          <select id="transactionCategory"></select>
+        </label>
+        <label id="fromAccountLabel">Paid from
+          <select id="transactionAccount"></select>
+        </label>
+        <label id="toAccountLabel" class="hidden">Moved to
+          <select id="transactionToAccount"></select>
+        </label>
+      </div>
+
+      <fieldset id="worthFieldset" class="worth-fieldset">
+        <legend>Was this spending worth it?</legend>
+        <div class="worth-options">
+          <label><input type="radio" name="worth" value="essential" checked /><span>Essential<small>I needed it</small></span></label>
+          <label><input type="radio" name="worth" value="worth"><span>Worth it<small>It added value</small></span></label>
+          <label><input type="radio" name="worth" value="unsure"><span>Unsure<small>Review later</small></span></label>
+          <label><input type="radio" name="worth" value="waste"><span>Waste<small>Not worth it</small></span></label>
+        </div>
+      </fieldset>
+
+      <label>Notes (optional)
+        <textarea id="transactionNotes" rows="3" maxlength="300" placeholder="Anything you want to remember"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="text-button danger-text hidden" id="deleteTransactionButton">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="secondary-button dialog-close">Cancel</button>
+        <button type="submit" class="primary-button">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="accountDialog" class="app-dialog">
+    <form method="dialog" id="accountForm">
+      <div class="dialog-header">
+        <div><p class="eyebrow">ACCOUNT</p><h2 id="accountDialogTitle">Add what you own or owe</h2></div>
+        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
+      </div>
+      <input type="hidden" id="accountId" />
+      <div class="form-grid">
+        <label class="full">Name
+          <input id="accountName" type="text" maxlength="60" required placeholder="Everyday bank, Cash, Visa…" />
+        </label>
+        <label>Type
+          <select id="accountType">
+            <option value="bank">Bank / transaction</option>
+            <option value="savings">Savings</option>
+            <option value="cash">Cash</option>
+            <option value="credit">Credit card</option>
+            <option value="loan">Loan / debt</option>
+            <option value="investment">Investment</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>Starting balance
+          <div class="money-input"><span>$</span><input id="accountOpeningBalance" type="number" step="0.01" value="0" required /></div>
+        </label>
+      </div>
+      <p class="muted small-copy">For credit cards or loans, enter the amount you currently owe as a positive number. The app treats those account types as debts.</p>
+      <div class="dialog-actions">
+        <button type="button" class="text-button danger-text hidden" id="deleteAccountButton">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="secondary-button dialog-close">Cancel</button>
+        <button type="submit" class="primary-button">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="subscriptionDialog" class="app-dialog">
+    <form method="dialog" id="subscriptionForm">
+      <div class="dialog-header">
+        <div><p class="eyebrow">RECURRING PAYMENT</p><h2 id="subscriptionDialogTitle">Add subscription or recurring bill</h2></div>
+        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
+      </div>
+      <input type="hidden" id="subscriptionId" />
+      <div class="form-grid">
+        <label class="full">What is it called?
+          <input id="subscriptionName" type="text" maxlength="80" required placeholder="Claude, insurance, streaming…" />
+        </label>
+        <label>Amount
+          <div class="money-input"><span>$</span><input id="subscriptionAmount" type="number" min="0" step="0.01" required /></div>
+        </label>
+        <label>How often?
+          <select id="subscriptionCycle">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </label>
+        <label>Next payment
+          <input id="subscriptionNextDate" type="date" />
+        </label>
+        <label>Paid from
+          <select id="subscriptionAccount"></select>
+        </label>
+        <label>Status
+          <select id="subscriptionStatus">
+            <option value="active">Active</option>
+            <option value="unknown">Unknown / needs checking</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </label>
+        <label>Value
+          <select id="subscriptionWorth">
+            <option value="essential">Essential</option>
+            <option value="worth">Worth it</option>
+            <option value="unsure">Unsure</option>
+            <option value="waste">Waste / cancel</option>
+          </select>
+        </label>
+        <label class="full">How do I cancel / what do I know?
+          <textarea id="subscriptionCancelNotes" rows="3" maxlength="400" placeholder="Website, app store, support email, card details, anything you remember…"></textarea>
+        </label>
+      </div>
+      <div class="annual-preview"><span>Equivalent yearly cost</span><strong id="subscriptionAnnualPreview">$0.00</strong></div>
+      <div class="dialog-actions">
+        <button type="button" class="text-button danger-text hidden" id="deleteSubscriptionButton">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="secondary-button dialog-close">Cancel</button>
+        <button type="submit" class="primary-button">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog" class="app-dialog help-dialog">
+    <div class="dialog-header">
+      <div><p class="eyebrow">NO SPREADSHEET KNOWLEDGE NEEDED</p><h2>How to use Every Cent</h2></div>
+      <button class="icon-button dialog-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="help-steps">
+      <article><b>1. Add your accounts.</b><p>Tell the app what bank accounts, cash, savings, credit cards and debts you currently have.</p></article>
+      <article><b>2. Tell it what happened.</b><p>Use “I spent money”, “I received money” or “I moved money”. Transfers between your own accounts do not count as spending.</p></article>
+      <article><b>3. Judge spending simply.</b><p>Mark spending Essential, Worth it, Unsure or Waste. You can change your mind later.</p></article>
+      <article><b>4. Rescue unknown subscriptions.</b><p>Add anything you spot in your bank or email, even if you do not know what it is. Mark it Unknown and the app keeps it visible.</p></article>
+      <article><b>5. Back it up.</b><p>This first version saves to this browser/device. Use Download backup regularly so you can restore your information later.</p></article>
+    </div>
+    <div class="dialog-actions"><span class="spacer"></span><button class="primary-button dialog-close" type="button">Got it</button></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

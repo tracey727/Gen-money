@@ -1,0 +1,9 @@
+{
+  "name": "Every Cent — Money Tracker",
+  "short_name": "Every Cent",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7f3",
+  "theme_color": "#143d2a",
+  "description": "A guided personal money tracker for knowing where every cent goes and whether it was worth it."
+}
