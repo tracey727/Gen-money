@@ -1,0 +1,75 @@
+.genevieve-entry {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 7%, rgba(38, 82, 132, .28), transparent 38%),
+    linear-gradient(180deg, #061426, #020912 76%);
+}
+.genevieve-entry::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 44%, rgba(214, 173, 69, .08), transparent 46%);
+}
+.genevieve-entry-shell {
+  position: relative;
+  width: min(1180px, 100%);
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+.genevieve-entry-kicker {
+  margin: 0;
+  color: #e3c36b;
+  font: 700 .72rem/1.2 Georgia, "Times New Roman", serif;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.genevieve-entry-button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: clamp(18px, 3vw, 34px);
+  background: transparent;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .62), 0 0 0 1px rgba(227, 195, 107, .16);
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+.genevieve-entry-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.genevieve-entry-button:hover {
+  filter: brightness(1.04);
+  transform: translateY(-2px);
+  box-shadow: 0 34px 100px rgba(0, 0, 0, .68), 0 0 0 1px rgba(227, 195, 107, .3);
+}
+.genevieve-entry-button:active { transform: scale(.992); }
+.genevieve-entry-button:focus-visible { outline: 3px solid #e3c36b; outline-offset: 5px; }
+.genevieve-entry-instruction {
+  margin: 0;
+  color: #c8d0dc;
+  font: italic 1rem/1.4 Georgia, "Times New Roman", serif;
+  text-align: center;
+}
+.genevieve-entry-instruction strong { color: #e3c36b; font-weight: 500; }
+.genevieve-entry-opening .genevieve-entry-shell {
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity .28s ease, transform .28s ease;
+}
+@media (max-width: 680px) {
+  .genevieve-entry { padding-left: 8px; padding-right: 8px; }
+  .genevieve-entry-shell { gap: 12px; }
+  .genevieve-entry-button { border-radius: 16px; }
+  .genevieve-entry-kicker { font-size: .61rem; letter-spacing: .17em; }
+  .genevieve-entry-instruction { font-size: .88rem; padding-inline: 16px; }
+}
