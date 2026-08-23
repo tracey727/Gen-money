@@ -1,11 +1,11 @@
 {
-  "name":"Genevieve App — Every Cent",
+  "name":"Genevieve App — Personal Money Command Centre",
   "short_name":"Genevieve App",
-  "description":"Private personal money tracker with automatic online saving.",
+  "description":"Tracey's private Genevieve personal money command centre.",
   "start_url":"/",
   "display":"standalone",
-  "background_color":"#f5f0e7",
-  "theme_color":"#14213d",
+  "background_color":"#020b18",
+  "theme_color":"#061426",
   "icons":[
     {"src":"/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
     {"src":"/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
