@@ -1,11 +1,11 @@
 {
-  "name":"Genevieve App — Personal Money Command Centre",
-  "short_name":"Genevieve App",
-  "description":"Tracey's private Genevieve personal money command centre.",
+  "name":"Genevieve App — Budget App",
+  "short_name":"Budget App",
+  "description":"Personal budgeting, spending, bills, savings and waste review with the Genevieve warning system.",
   "start_url":"/",
   "display":"standalone",
-  "background_color":"#020b18",
-  "theme_color":"#061426",
+  "background_color":"#21070c",
+  "theme_color":"#3b0b14",
   "icons":[
     {"src":"/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
     {"src":"/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
