@@ -3,418 +3,166 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#143d2a" />
-  <meta name="description" content="Every Cent is a private, guided personal money tracker for understanding where your money goes and whether it is worth it." />
-  <title>Every Cent — Money Tracker</title>
+  <meta name="theme-color" content="#3b0b14" />
+  <meta name="description" content="Genevieve App Budget App — personal budgeting, expenses, bills, savings and waste review." />
+  <title>Genevieve App — Budget App</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">PERSONAL MONEY COMMAND CENTRE</p>
-        <h1>Every Cent</h1>
-        <p class="tagline">Know what you have. Know where it went. Decide if it was worth it.</p>
+  <div class="app-shell" id="appShell">
+    <header class="brand-header">
+      <div class="brand-logo-wrap">
+        <img class="brand-logo" src="/assets/genevieve-roots-logo.webp" alt="Genevieve tree and roots — Safety from roots to every journey" />
       </div>
-      <button class="icon-button" id="helpButton" aria-label="Open help">?</button>
+      <div class="brand-copy">
+        <p class="brand-kicker">PERSONAL FINANCE · TRACEY</p>
+        <h1 class="script-title">Genevieve App</h1>
+        <p class="budget-title">Budget App</p>
+        <p class="brand-tagline">Safety from roots to every journey</p>
+      </div>
+      <button class="round-button" id="helpButton" aria-label="Help">?</button>
     </header>
 
+    <div class="warning-legend" aria-label="Genevieve warning system">
+      <span><i class="signal green"></i><b>GREEN</b> Safe</span>
+      <span><i class="signal yellow"></i><b>YELLOW</b> Watch</span>
+      <span><i class="signal red"></i><b>RED</b> Stop & review</span>
+    </div>
+
     <nav class="primary-nav" aria-label="Main navigation">
-      <button class="nav-button active" data-view="dashboard">Home</button>
-      <button class="nav-button" data-view="transactions">Money</button>
-      <button class="nav-button" data-view="subscriptions">Subscriptions</button>
-      <button class="nav-button" data-view="accounts">Accounts</button>
-      <button class="nav-button" data-view="review">Review</button>
+      <button class="nav-button active" data-view="home"><span>⌂</span>Home</button>
+      <button class="nav-button" data-view="money"><span>$</span>Money</button>
+      <button class="nav-button" data-view="budget"><span>◇</span>Budget</button>
+      <button class="nav-button" data-view="bills"><span>▤</span>Bills</button>
+      <button class="nav-button" data-view="goals"><span>◎</span>Goals</button>
+      <button class="nav-button" data-view="review"><span>◈</span>Review</button>
     </nav>
 
     <main>
-      <section class="view active" id="dashboardView" data-view="dashboard">
-        <div class="hero-grid">
-          <article class="hero-card balance-card">
-            <span class="card-label">Money position</span>
-            <strong class="hero-number" id="netWorthValue">$0.00</strong>
-            <span class="muted" id="netWorthHint">Add your accounts to begin.</span>
-          </article>
-          <article class="hero-card waste-card">
-            <span class="card-label">Potential waste this month</span>
-            <strong class="hero-number" id="wasteMonthValue">$0.00</strong>
-            <span class="muted" id="wasteMonthHint">Items you marked Waste or Unsure.</span>
-          </article>
+      <section class="view active" data-view="home">
+        <div class="status-hero" id="moneyStatusCard">
+          <div>
+            <p class="eyebrow">GENEVIEVE MONEY STATUS</p>
+            <div class="status-row"><span class="status-dot" id="moneyStatusDot"></span><strong id="moneyStatusText">SET UP</strong></div>
+            <p class="status-message" id="moneyStatusMessage">Add your account balance, budget and next income date to calculate your safe-to-spend amount.</p>
+          </div>
+          <div class="safe-spend">
+            <span>Safe to spend now</span>
+            <strong id="safeSpendNow">$0.00</strong>
+            <small id="safeDailyText">Daily guide: —</small>
+          </div>
         </div>
 
-        <section class="panel action-panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">TELL THE APP WHAT HAPPENED</p>
-              <h2>What happened with your money?</h2>
-            </div>
-          </div>
+        <section class="metric-grid">
+          <article class="metric-card"><span>Money position</span><strong id="netWorthValue">$0.00</strong><small id="netWorthHint">Add accounts to begin.</small></article>
+          <article class="metric-card"><span>Income this month</span><strong id="incomeMonth">$0.00</strong><small>Money received</small></article>
+          <article class="metric-card"><span>Spent this month</span><strong id="spentMonth">$0.00</strong><small>Expenses only</small></article>
+          <article class="metric-card"><span>Potential waste</span><strong id="wasteMonthValue">$0.00</strong><small>Unsure + Waste</small></article>
+        </section>
+
+        <section class="panel quick-panel">
+          <div class="section-heading"><div><p class="eyebrow">QUICK ENTRY</p><h2>What happened with your money?</h2></div></div>
           <div class="quick-actions">
-            <button class="quick-action spend" data-quick="expense">
-              <span class="quick-icon">−</span>
-              <span><b>I spent money</b><small>Purchase, bill, cash spend</small></span>
-            </button>
-            <button class="quick-action income" data-quick="income">
-              <span class="quick-icon">+</span>
-              <span><b>I received money</b><small>Pension, refund, income</small></span>
-            </button>
-            <button class="quick-action transfer" data-quick="transfer">
-              <span class="quick-icon">⇄</span>
-              <span><b>I moved money</b><small>Transfer between my accounts</small></span>
-            </button>
-            <button class="quick-action account" id="quickAddAccount">
-              <span class="quick-icon">◎</span>
-              <span><b>Add what I own or owe</b><small>Bank, cash, card, loan</small></span>
-            </button>
+            <button class="quick-action" data-quick="expense"><span class="quick-symbol">−</span><b>I spent money</b><small>Purchase, bill or cash spend</small></button>
+            <button class="quick-action" data-quick="income"><span class="quick-symbol">+</span><b>I received money</b><small>Income, pension or refund</small></button>
+            <button class="quick-action" data-quick="transfer"><span class="quick-symbol">⇄</span><b>I moved money</b><small>Between my accounts</small></button>
+            <button class="quick-action" id="quickAddAccount"><span class="quick-symbol">◎</span><b>Add an account</b><small>Bank, cash, card or debt</small></button>
           </div>
         </section>
 
-        <section class="stats-grid" aria-label="Monthly summary">
-          <article class="stat-card"><span>Income this month</span><strong id="incomeMonth">$0.00</strong></article>
-          <article class="stat-card"><span>Spent this month</span><strong id="spentMonth">$0.00</strong></article>
-          <article class="stat-card"><span>Money left this month</span><strong id="cashflowMonth">$0.00</strong></article>
-          <article class="stat-card"><span>Active subscriptions / year</span><strong id="subscriptionYear">$0.00</strong></article>
-        </section>
-
-        <section class="panel" id="attentionPanel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">NEEDS ATTENTION</p>
-              <h2>Things to check</h2>
-            </div>
-            <span class="pill danger" id="attentionCount">0</span>
-          </div>
-          <div id="attentionList" class="stack-list empty-state">Nothing needs attention yet.</div>
+        <section class="home-two-col">
+          <article class="panel">
+            <div class="section-heading"><div><p class="eyebrow">UPCOMING</p><h2>Bills to protect</h2></div><button class="text-button" data-view-link="bills">View all</button></div>
+            <div id="homeBills" class="stack-list empty-state">No upcoming bills yet.</div>
+          </article>
+          <article class="panel">
+            <div class="section-heading"><div><p class="eyebrow">WASTE WATCH</p><h2>Money worth reviewing</h2></div><span class="counter" id="attentionCount">0</span></div>
+            <div id="attentionList" class="stack-list empty-state">Nothing needs attention.</div>
+          </article>
         </section>
 
         <section class="panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">RECENT</p>
-              <h2>Latest money movements</h2>
-            </div>
-            <button class="text-button" data-view-link="transactions">See all</button>
-          </div>
-          <div id="recentTransactions" class="stack-list empty-state">No transactions recorded yet.</div>
+          <div class="section-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Latest money movements</h2></div><button class="text-button" data-view-link="money">See all</button></div>
+          <div id="recentTransactions" class="stack-list empty-state">No transactions yet.</div>
         </section>
       </section>
 
-      <section class="view" id="transactionsView" data-view="transactions">
-        <div class="section-heading sticky-heading">
-          <div>
-            <p class="eyebrow">EVERY CENT OUT, IN, OR MOVED</p>
-            <h2>Money</h2>
-          </div>
-          <button class="primary-button" id="addTransactionButton">+ Add</button>
-        </div>
-
-        <section class="panel filters-panel">
-          <div class="filter-grid">
-            <label>Show
-              <select id="transactionTypeFilter">
-                <option value="all">Everything</option>
-                <option value="expense">Spent</option>
-                <option value="income">Received</option>
-                <option value="transfer">Moved</option>
-              </select>
-            </label>
-            <label>Search
-              <input id="transactionSearch" type="search" placeholder="Shop, bill, note…" />
-            </label>
-          </div>
-        </section>
-
+      <section class="view" data-view="money">
+        <div class="section-heading sticky-heading"><div><p class="eyebrow">EVERY CENT</p><h2>Money & expenses</h2></div><button class="primary-button" id="addTransactionButton">+ Add</button></div>
+        <section class="panel filters-panel"><div class="filter-grid">
+          <label>Show<select id="transactionTypeFilter"><option value="all">Everything</option><option value="expense">Spent</option><option value="income">Received</option><option value="transfer">Moved</option></select></label>
+          <label>Search<input id="transactionSearch" type="search" placeholder="Shop, bill, category…" /></label>
+        </div></section>
         <div id="transactionList" class="stack-list large-list empty-state">No transactions yet.</div>
+        <section class="panel">
+          <div class="section-heading"><div><p class="eyebrow">ACCOUNTS</p><h2>What you own and owe</h2></div><button class="primary-button" id="addAccountButton">+ Account</button></div>
+          <div class="account-summary"><span>Assets <strong id="assetsTotal">$0.00</strong></span><span>Debts <strong id="debtsTotal">$0.00</strong></span><span>Net <strong id="netPositionTotal">$0.00</strong></span></div>
+          <div id="accountList" class="stack-list empty-state">Add your accounts.</div>
+        </section>
       </section>
 
-      <section class="view" id="subscriptionsView" data-view="subscriptions">
-        <div class="section-heading sticky-heading">
-          <div>
-            <p class="eyebrow">SUBSCRIPTION RESCUE</p>
-            <h2>Recurring payments</h2>
-          </div>
-          <button class="primary-button" id="addSubscriptionButton">+ Add</button>
-        </div>
-
-        <section class="rescue-banner">
-          <div>
-            <p class="eyebrow">I DON'T KNOW WHAT I SIGNED UP FOR</p>
-            <h3>Subscription Rescue</h3>
-            <p>Record anything you recognise from your bank or email. Mark it <b>Unknown</b> and it stays on your attention list until you resolve it.</p>
-          </div>
-          <button class="secondary-button" id="startRescueButton">Start rescue</button>
-        </section>
-
-        <section class="stats-grid compact">
-          <article class="stat-card"><span>Active monthly equivalent</span><strong id="subscriptionMonthly">$0.00</strong></article>
-          <article class="stat-card"><span>Active annual cost</span><strong id="subscriptionAnnual">$0.00</strong></article>
-          <article class="stat-card"><span>Possible annual cuts</span><strong id="subscriptionCuts">$0.00</strong></article>
-          <article class="stat-card"><span>Needs checking</span><strong id="subscriptionUnknownCount">0</strong></article>
-        </section>
-
-        <div id="subscriptionList" class="stack-list large-list empty-state">No recurring payments recorded yet.</div>
+      <section class="view" data-view="budget">
+        <div class="section-heading sticky-heading"><div><p class="eyebrow">MONTHLY PLAN</p><h2>Budget</h2></div><button class="primary-button" id="editBudgetButton">Edit budget</button></div>
+        <section class="panel budget-overview"><div><span>Monthly budget</span><strong id="budgetTotal">$0.00</strong></div><div><span>Spent</span><strong id="budgetSpent">$0.00</strong></div><div><span>Remaining</span><strong id="budgetRemaining">$0.00</strong></div></section>
+        <div id="budgetList" class="budget-list"></div>
       </section>
 
-      <section class="view" id="accountsView" data-view="accounts">
-        <div class="section-heading sticky-heading">
-          <div>
-            <p class="eyebrow">WHAT YOU OWN AND WHAT YOU OWE</p>
-            <h2>Accounts</h2>
-          </div>
-          <button class="primary-button" id="addAccountButton">+ Add</button>
-        </div>
-
-        <section class="stats-grid compact">
-          <article class="stat-card"><span>Assets</span><strong id="assetsTotal">$0.00</strong></article>
-          <article class="stat-card"><span>Debts</span><strong id="debtsTotal">$0.00</strong></article>
-          <article class="stat-card"><span>Net position</span><strong id="netPositionTotal">$0.00</strong></article>
+      <section class="view" data-view="bills">
+        <div class="section-heading sticky-heading"><div><p class="eyebrow">PROTECT BEFORE SPENDING</p><h2>Bills & subscriptions</h2></div><button class="primary-button" id="addBillButton">+ Bill</button></div>
+        <section class="metric-grid compact">
+          <article class="metric-card"><span>Due next 7 days</span><strong id="billsNext7">$0.00</strong><small id="billCountNext7">0 bills</small></article>
+          <article class="metric-card"><span>Recurring annual cost</span><strong id="recurringAnnual">$0.00</strong><small>Active recurring costs</small></article>
+          <article class="metric-card"><span>Possible annual cuts</span><strong id="possibleAnnualCuts">$0.00</strong><small>Unsure + Waste recurring</small></article>
         </section>
-        <div id="accountList" class="stack-list large-list empty-state">Add your bank account, savings, cash, credit card or loan.</div>
+        <div id="billList" class="stack-list large-list empty-state">No bills recorded yet.</div>
       </section>
 
-      <section class="view" id="reviewView" data-view="review">
-        <div class="section-heading sticky-heading">
-          <div>
-            <p class="eyebrow">IS IT WORTH IT?</p>
-            <h2>Money review</h2>
-          </div>
-        </div>
-
-        <section class="panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">THIS MONTH</p>
-              <h3>Your spending judgement</h3>
-            </div>
-          </div>
-          <div id="worthBreakdown" class="worth-breakdown"></div>
+      <section class="view" data-view="goals">
+        <div class="section-heading sticky-heading"><div><p class="eyebrow">FUTURE MONEY</p><h2>Savings goals</h2></div><button class="primary-button" id="addGoalButton">+ Goal</button></div>
+        <div id="goalList" class="goal-grid empty-state">No savings goals yet.</div>
+        <section class="panel settings-panel">
+          <div class="section-heading"><div><p class="eyebrow">SAFE-TO-SPEND ENGINE</p><h2>Your money settings</h2></div></div>
+          <form id="settingsForm" class="form-grid inline-form">
+            <label>Next income date<input id="nextIncomeDate" type="date" /></label>
+            <label>Protected cash buffer<div class="money-input"><span>$</span><input id="protectedBuffer" type="number" min="0" step="0.01" inputmode="decimal" /></div></label>
+            <button class="primary-button" type="submit">Save settings</button>
+          </form>
         </section>
+      </section>
 
-        <section class="panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">WHERE IT WENT</p>
-              <h3>Spending by category</h3>
-            </div>
-          </div>
-          <div id="categoryBreakdown" class="bar-list empty-state">No spending to review yet.</div>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">PROTECT MY MONEY</p>
-              <h3>Before another recurring purchase</h3>
-            </div>
-          </div>
-          <div class="protection-copy">
-            <p>Before you approve a new subscription, calculate the real annual cost and decide whether it is genuinely useful.</p>
-            <div class="annualiser">
-              <label>Subscription amount
-                <input type="number" min="0" step="0.01" id="protectAmount" placeholder="34.00" />
-              </label>
-              <label>How often?
-                <select id="protectCycle">
-                  <option value="monthly">Monthly</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="fortnightly">Fortnightly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
-              </label>
-              <div class="annual-result">
-                <span>Real yearly cost</span>
-                <strong id="protectAnnual">$0.00</strong>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">YOUR DATA</p>
-              <h3>Backup and export</h3>
-            </div>
-          </div>
-          <div class="button-row">
-            <button class="secondary-button" id="backupButton">Download backup</button>
-            <button class="secondary-button" id="restoreButton">Restore backup</button>
-            <button class="secondary-button" id="exportCsvButton">Export transactions CSV</button>
-          </div>
-          <input type="file" id="restoreInput" accept="application/json" hidden />
-          <p class="muted small-copy">This version stores your data in this browser on this device. Keep backups if the information matters to you.</p>
-        </section>
+      <section class="view" data-view="review">
+        <div class="section-heading sticky-heading"><div><p class="eyebrow">PERSONAL REVIEW</p><h2>Experience & expenses</h2></div></div>
+        <section class="panel"><div class="section-heading"><div><p class="eyebrow">WAS IT WORTH IT?</p><h2>This month</h2></div></div><div id="worthBreakdown" class="worth-grid"></div></section>
+        <section class="panel"><div class="section-heading"><div><p class="eyebrow">WHERE IT WENT</p><h2>Spending by category</h2></div></div><div id="categoryBreakdown" class="bar-list empty-state">No spending to review.</div></section>
+        <section class="panel"><div class="section-heading"><div><p class="eyebrow">SUBSCRIPTION RESCUE</p><h2>Recurring costs to review</h2></div></div><div id="recurringReview" class="stack-list empty-state">No recurring costs to review.</div></section>
+        <section class="panel"><div class="section-heading"><div><p class="eyebrow">YOUR DATA</p><h2>Backup & export</h2></div></div><div class="button-row"><button class="secondary-button" id="backupButton">Download backup</button><button class="secondary-button" id="restoreButton">Restore backup</button><button class="secondary-button" id="exportCsvButton">Export CSV</button></div><input type="file" id="restoreInput" accept="application/json" hidden /></section>
       </section>
     </main>
   </div>
 
-  <dialog id="transactionDialog" class="app-dialog">
-    <form method="dialog" id="transactionForm">
-      <div class="dialog-header">
-        <div><p class="eyebrow">MONEY ENTRY</p><h2 id="transactionDialogTitle">Add money movement</h2></div>
-        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
-      </div>
-      <input type="hidden" id="transactionId" />
-      <div class="segmented" role="group" aria-label="Transaction type">
-        <button type="button" data-type-choice="expense" class="selected">Spent</button>
-        <button type="button" data-type-choice="income">Received</button>
-        <button type="button" data-type-choice="transfer">Moved</button>
-      </div>
-      <input type="hidden" id="transactionType" value="expense" />
-      <div class="form-grid">
-        <label>Amount
-          <div class="money-input"><span>$</span><input id="transactionAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" /></div>
-        </label>
-        <label>Date
-          <input id="transactionDate" type="date" required />
-        </label>
-        <label class="full">What was it?
-          <input id="transactionMerchant" type="text" maxlength="80" placeholder="Groceries, pension, transfer…" required />
-        </label>
-        <label>Category
-          <select id="transactionCategory"></select>
-        </label>
-        <label id="fromAccountLabel">Paid from
-          <select id="transactionAccount"></select>
-        </label>
-        <label id="toAccountLabel" class="hidden">Moved to
-          <select id="transactionToAccount"></select>
-        </label>
-      </div>
+  <dialog id="transactionDialog" class="app-dialog"><form id="transactionForm">
+    <div class="dialog-header"><div><p class="eyebrow">MONEY ENTRY</p><h2 id="transactionDialogTitle">Add money movement</h2></div><button type="button" class="round-button dialog-close">×</button></div>
+    <input id="transactionId" type="hidden" />
+    <div class="segmented"><button type="button" class="selected" data-type-choice="expense">Spent</button><button type="button" data-type-choice="income">Received</button><button type="button" data-type-choice="transfer">Moved</button></div><input id="transactionType" type="hidden" value="expense" />
+    <div class="form-grid"><label>Amount<div class="money-input"><span>$</span><input id="transactionAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" /></div></label><label>Date<input id="transactionDate" type="date" required /></label><label class="full">What was it?<input id="transactionMerchant" maxlength="80" required placeholder="Groceries, rent, pension…" /></label><label>Category<select id="transactionCategory"></select></label><label id="fromAccountLabel">Paid from<select id="transactionAccount"></select></label><label id="toAccountLabel" class="hidden">Moved to<select id="transactionToAccount"></select></label></div>
+    <div id="transactionWarning" class="transaction-warning green"><span class="status-dot"></span><div><b>GREEN</b><small>Within your plan.</small></div></div>
+    <fieldset id="worthFieldset" class="worth-fieldset"><legend>How did this spending feel?</legend><div class="worth-options"><label><input type="radio" name="worth" value="essential" checked /><span>Essential<small>Needed for life or obligations</small></span></label><label><input type="radio" name="worth" value="worth" /><span>Worth it<small>Added genuine value</small></span></label><label><input type="radio" name="worth" value="unsure" /><span>Unsure<small>Review it later</small></span></label><label><input type="radio" name="worth" value="waste" /><span>Waste<small>Would not choose again</small></span></label></div></fieldset>
+    <label>Reflection / notes<textarea id="transactionNotes" maxlength="300" placeholder="Anything you want to remember about this expense"></textarea></label>
+    <div class="dialog-actions"><button type="button" class="text-button danger-text hidden" id="deleteTransactionButton">Delete</button><span class="spacer"></span><button type="button" class="secondary-button dialog-close">Cancel</button><button type="submit" class="primary-button">Save</button></div>
+  </form></dialog>
 
-      <fieldset id="worthFieldset" class="worth-fieldset">
-        <legend>Was this spending worth it?</legend>
-        <div class="worth-options">
-          <label><input type="radio" name="worth" value="essential" checked /><span>Essential<small>I needed it</small></span></label>
-          <label><input type="radio" name="worth" value="worth"><span>Worth it<small>It added value</small></span></label>
-          <label><input type="radio" name="worth" value="unsure"><span>Unsure<small>Review later</small></span></label>
-          <label><input type="radio" name="worth" value="waste"><span>Waste<small>Not worth it</small></span></label>
-        </div>
-      </fieldset>
+  <dialog id="accountDialog" class="app-dialog"><form id="accountForm"><div class="dialog-header"><div><p class="eyebrow">ACCOUNT</p><h2 id="accountDialogTitle">Add an account</h2></div><button type="button" class="round-button dialog-close">×</button></div><input id="accountId" type="hidden" /><div class="form-grid"><label class="full">Name<input id="accountName" required maxlength="60" placeholder="Everyday account" /></label><label>Type<select id="accountType"><option value="bank">Bank / transaction</option><option value="savings">Savings</option><option value="cash">Cash</option><option value="credit">Credit card</option><option value="loan">Loan / debt</option><option value="investment">Investment</option><option value="other">Other</option></select></label><label>Starting balance<div class="money-input"><span>$</span><input id="accountOpeningBalance" type="number" step="0.01" value="0" /></div></label><label class="full check-row"><input id="accountSpendable" type="checkbox" checked /> Include positive balance in safe-to-spend cash</label></div><div class="dialog-actions"><button type="button" class="text-button danger-text hidden" id="deleteAccountButton">Delete</button><span class="spacer"></span><button type="button" class="secondary-button dialog-close">Cancel</button><button class="primary-button" type="submit">Save</button></div></form></dialog>
 
-      <label>Notes (optional)
-        <textarea id="transactionNotes" rows="3" maxlength="300" placeholder="Anything you want to remember"></textarea>
-      </label>
-      <div class="dialog-actions">
-        <button type="button" class="text-button danger-text hidden" id="deleteTransactionButton">Delete</button>
-        <span class="spacer"></span>
-        <button type="button" class="secondary-button dialog-close">Cancel</button>
-        <button type="submit" class="primary-button">Save</button>
-      </div>
-    </form>
-  </dialog>
+  <dialog id="billDialog" class="app-dialog"><form id="billForm"><div class="dialog-header"><div><p class="eyebrow">BILL / SUBSCRIPTION</p><h2 id="billDialogTitle">Add a bill</h2></div><button type="button" class="round-button dialog-close">×</button></div><input id="billId" type="hidden" /><div class="form-grid"><label class="full">Name<input id="billName" required maxlength="80" placeholder="Electricity, Netflix, insurance…" /></label><label>Amount<div class="money-input"><span>$</span><input id="billAmount" type="number" min="0" step="0.01" required /></div></label><label>Next due date<input id="billDueDate" type="date" /></label><label>Frequency<select id="billFrequency"><option value="oneoff">One-off</option><option value="weekly">Weekly</option><option value="fortnightly">Fortnightly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></label><label>Category<select id="billCategory"></select></label><label>Value verdict<select id="billWorth"><option value="essential">Essential</option><option value="worth">Worth it</option><option value="unsure">Unsure</option><option value="waste">Waste</option></select></label><label>Status<select id="billStatus"><option value="unpaid">Unpaid</option><option value="scheduled">Scheduled</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option></select></label></div><label>Notes<textarea id="billNotes" maxlength="300"></textarea></label><div class="dialog-actions"><button type="button" class="text-button danger-text hidden" id="deleteBillButton">Delete</button><span class="spacer"></span><button type="button" class="secondary-button dialog-close">Cancel</button><button class="primary-button" type="submit">Save</button></div></form></dialog>
 
-  <dialog id="accountDialog" class="app-dialog">
-    <form method="dialog" id="accountForm">
-      <div class="dialog-header">
-        <div><p class="eyebrow">ACCOUNT</p><h2 id="accountDialogTitle">Add what you own or owe</h2></div>
-        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
-      </div>
-      <input type="hidden" id="accountId" />
-      <div class="form-grid">
-        <label class="full">Name
-          <input id="accountName" type="text" maxlength="60" required placeholder="Everyday bank, Cash, Visa…" />
-        </label>
-        <label>Type
-          <select id="accountType">
-            <option value="bank">Bank / transaction</option>
-            <option value="savings">Savings</option>
-            <option value="cash">Cash</option>
-            <option value="credit">Credit card</option>
-            <option value="loan">Loan / debt</option>
-            <option value="investment">Investment</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
-        <label>Starting balance
-          <div class="money-input"><span>$</span><input id="accountOpeningBalance" type="number" step="0.01" value="0" required /></div>
-        </label>
-      </div>
-      <p class="muted small-copy">For credit cards or loans, enter the amount you currently owe as a positive number. The app treats those account types as debts.</p>
-      <div class="dialog-actions">
-        <button type="button" class="text-button danger-text hidden" id="deleteAccountButton">Delete</button>
-        <span class="spacer"></span>
-        <button type="button" class="secondary-button dialog-close">Cancel</button>
-        <button type="submit" class="primary-button">Save</button>
-      </div>
-    </form>
-  </dialog>
+  <dialog id="goalDialog" class="app-dialog"><form id="goalForm"><div class="dialog-header"><div><p class="eyebrow">SAVINGS GOAL</p><h2 id="goalDialogTitle">Add a goal</h2></div><button type="button" class="round-button dialog-close">×</button></div><input id="goalId" type="hidden" /><div class="form-grid"><label class="full">Goal name<input id="goalName" required maxlength="80" placeholder="Emergency fund" /></label><label>Target<div class="money-input"><span>$</span><input id="goalTarget" type="number" min="0" step="0.01" required /></div></label><label>Saved so far<div class="money-input"><span>$</span><input id="goalSaved" type="number" min="0" step="0.01" /></div></label><label>Target date<input id="goalDate" type="date" /></label><label>Priority<select id="goalPriority"><option>High</option><option>Medium</option><option>Low</option></select></label></div><div class="dialog-actions"><button type="button" class="text-button danger-text hidden" id="deleteGoalButton">Delete</button><span class="spacer"></span><button type="button" class="secondary-button dialog-close">Cancel</button><button class="primary-button" type="submit">Save</button></div></form></dialog>
 
-  <dialog id="subscriptionDialog" class="app-dialog">
-    <form method="dialog" id="subscriptionForm">
-      <div class="dialog-header">
-        <div><p class="eyebrow">RECURRING PAYMENT</p><h2 id="subscriptionDialogTitle">Add subscription or recurring bill</h2></div>
-        <button class="icon-button dialog-close" value="cancel" type="button" aria-label="Close">×</button>
-      </div>
-      <input type="hidden" id="subscriptionId" />
-      <div class="form-grid">
-        <label class="full">What is it called?
-          <input id="subscriptionName" type="text" maxlength="80" required placeholder="Claude, insurance, streaming…" />
-        </label>
-        <label>Amount
-          <div class="money-input"><span>$</span><input id="subscriptionAmount" type="number" min="0" step="0.01" required /></div>
-        </label>
-        <label>How often?
-          <select id="subscriptionCycle">
-            <option value="monthly">Monthly</option>
-            <option value="weekly">Weekly</option>
-            <option value="fortnightly">Fortnightly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </label>
-        <label>Next payment
-          <input id="subscriptionNextDate" type="date" />
-        </label>
-        <label>Paid from
-          <select id="subscriptionAccount"></select>
-        </label>
-        <label>Status
-          <select id="subscriptionStatus">
-            <option value="active">Active</option>
-            <option value="unknown">Unknown / needs checking</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </label>
-        <label>Value
-          <select id="subscriptionWorth">
-            <option value="essential">Essential</option>
-            <option value="worth">Worth it</option>
-            <option value="unsure">Unsure</option>
-            <option value="waste">Waste / cancel</option>
-          </select>
-        </label>
-        <label class="full">How do I cancel / what do I know?
-          <textarea id="subscriptionCancelNotes" rows="3" maxlength="400" placeholder="Website, app store, support email, card details, anything you remember…"></textarea>
-        </label>
-      </div>
-      <div class="annual-preview"><span>Equivalent yearly cost</span><strong id="subscriptionAnnualPreview">$0.00</strong></div>
-      <div class="dialog-actions">
-        <button type="button" class="text-button danger-text hidden" id="deleteSubscriptionButton">Delete</button>
-        <span class="spacer"></span>
-        <button type="button" class="secondary-button dialog-close">Cancel</button>
-        <button type="submit" class="primary-button">Save</button>
-      </div>
-    </form>
-  </dialog>
+  <dialog id="budgetDialog" class="app-dialog wide-dialog"><form id="budgetForm"><div class="dialog-header"><div><p class="eyebrow">MONTHLY BUDGET</p><h2>Set category limits</h2></div><button type="button" class="round-button dialog-close">×</button></div><div id="budgetInputs" class="budget-input-grid"></div><div class="dialog-actions"><span class="spacer"></span><button type="button" class="secondary-button dialog-close">Cancel</button><button class="primary-button" type="submit">Save budget</button></div></form></dialog>
 
-  <dialog id="helpDialog" class="app-dialog help-dialog">
-    <div class="dialog-header">
-      <div><p class="eyebrow">NO SPREADSHEET KNOWLEDGE NEEDED</p><h2>How to use Every Cent</h2></div>
-      <button class="icon-button dialog-close" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="help-steps">
-      <article><b>1. Add your accounts.</b><p>Tell the app what bank accounts, cash, savings, credit cards and debts you currently have.</p></article>
-      <article><b>2. Tell it what happened.</b><p>Use “I spent money”, “I received money” or “I moved money”. Transfers between your own accounts do not count as spending.</p></article>
-      <article><b>3. Judge spending simply.</b><p>Mark spending Essential, Worth it, Unsure or Waste. You can change your mind later.</p></article>
-      <article><b>4. Rescue unknown subscriptions.</b><p>Add anything you spot in your bank or email, even if you do not know what it is. Mark it Unknown and the app keeps it visible.</p></article>
-      <article><b>5. Back it up.</b><p>This first version saves to this browser/device. Use Download backup regularly so you can restore your information later.</p></article>
-    </div>
-    <div class="dialog-actions"><span class="spacer"></span><button class="primary-button dialog-close" type="button">Got it</button></div>
-  </dialog>
+  <dialog id="helpDialog" class="app-dialog"><div class="help-content"><div class="dialog-header"><div><p class="eyebrow">GENEVIEVE APP</p><h2>Budget App</h2></div><button type="button" class="round-button dialog-close">×</button></div><p>This app combines budgeting with waste review. Record money honestly, set category limits, protect upcoming bills, and use the Genevieve warning colours before overspending.</p><div class="help-steps"><article><b><i class="signal green"></i> GREEN</b><p>Within plan. Spending remains comfortably inside the category limit.</p></article><article><b><i class="signal yellow"></i> YELLOW</b><p>Watch. The category is getting close to its limit or safe daily spending is low.</p></article><article><b><i class="signal red"></i> RED</b><p>Stop and review. Budget is nearly exhausted, exceeded, or protected money would be used.</p></article></div></div></dialog>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <script src="/app.js" defer></script>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/app.js"></script>
 </body>
 </html>
