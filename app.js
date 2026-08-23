@@ -12,7 +12,7 @@
   let cloudReady = false;
 
   brandPage();
-  start();
+  showHomeEntry().then(start);
 
   function brandPage() {
     document.title = 'Genevieve App — Personal Money Command Centre';
@@ -39,6 +39,41 @@
     appleTitle.name = 'apple-mobile-web-app-title';
     appleTitle.content = 'Genevieve App';
     document.head.appendChild(appleTitle);
+  }
+
+  function showHomeEntry() {
+    return new Promise(resolve => {
+      const entry = document.createElement('div');
+      entry.className = 'genevieve-entry';
+      entry.setAttribute('role', 'dialog');
+      entry.setAttribute('aria-label', 'Open Genevieve Personal Money Command Centre');
+      entry.innerHTML = `
+        <div class="genevieve-entry-shell">
+          <p class="genevieve-entry-kicker">Tracey · Genevieve App</p>
+          <button class="genevieve-entry-button" type="button" aria-label="Open Personal Money Command Centre dashboard">
+            <img src="/assets/personal-money-command-centre-toggle.webp?v=20260824-1" alt="Genevieve App Personal Money Command Centre. Track spending, bills, savings, subscriptions and what is safe to spend. Open Dashboard." />
+          </button>
+          <p class="genevieve-entry-instruction">Tap the <strong>Personal Money Command Centre</strong> to enter your app.</p>
+        </div>`;
+
+      document.body.appendChild(entry);
+      const previousOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+
+      const button = entry.querySelector('.genevieve-entry-button');
+      button.addEventListener('click', () => {
+        if (entry.classList.contains('genevieve-entry-opening')) return;
+        entry.classList.add('genevieve-entry-opening');
+        button.disabled = true;
+        setTimeout(() => {
+          entry.remove();
+          document.documentElement.style.overflow = previousOverflow;
+          resolve();
+        }, 280);
+      });
+
+      requestAnimationFrame(() => button.focus({ preventScroll: true }));
+    });
   }
 
   function addHeadLink(rel, href) {
