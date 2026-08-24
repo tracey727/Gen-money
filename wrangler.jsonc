@@ -5,6 +5,12 @@
   "compatibility_date": "2026-08-24",
   "workers_dev": true,
   "preview_urls": true,
+  "kv_namespaces": [
+    {
+      "binding": "GENEVIEVE_SECURE_CONFIG",
+      "id": "00000000000000000000000000000000"
+    }
+  ],
   "observability": {
     "enabled": true
   }
