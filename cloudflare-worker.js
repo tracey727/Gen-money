@@ -1,48 +1,39 @@
-const ORIGIN = 'https://gen-money.vercel.app';
+import { neon } from '@neondatabase/serverless';
 
-export default {
-  async fetch(request) {
-    const incoming = new URL(request.url);
+const ORIGIN='https://gen-money.vercel.app';
+const CONFIG_KEY='runtime-secrets-v1';
+const COOKIE='genevieve_session';
+const SESSION_MAX_AGE=60*60*24*30;
+const te=new TextEncoder();
+const td=new TextDecoder();
 
-    if (incoming.pathname === '/_edge/health') {
-      return Response.json({
-        ok: true,
-        app: 'Genevieve App — Budget App',
-        edge: 'cloudflare',
-        origin: ORIGIN,
-        timestamp: new Date().toISOString()
-      }, {
-        headers: { 'Cache-Control': 'no-store' }
-      });
-    }
+const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',...headers}});
+const b64u=bytes=>{let s='';new Uint8Array(bytes).forEach(b=>s+=String.fromCharCode(b));return btoa(s).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'')};
+const fromB64u=s=>{s=s.replaceAll('-','+').replaceAll('_','/');while(s.length%4)s+='=';const raw=atob(s),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out};
+const eq=(a,b)=>{if(a.length!==b.length)return false;let x=0;for(let i=0;i<a.length;i++)x|=a[i]^b[i];return x===0};
+const pemBytes=pem=>{const b64=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');return Uint8Array.from(atob(b64),c=>c.charCodeAt(0))};
+async function secrets(env){const raw=await env.GENEVIEVE_SECURE_CONFIG.get(CONFIG_KEY);return raw?JSON.parse(raw):null}
+async function db(env){const s=await secrets(env);if(!s?.databaseUrl)throw new Error('Secure database configuration is not ready');return neon(s.databaseUrl)}
+async function readJson(req){try{return await req.json()}catch{return {}}}
+function cookieValue(req,name){const c=req.headers.get('cookie')||'';for(const part of c.split(';')){const [k,...v]=part.trim().split('=');if(k===name)return v.join('=')}return ''}
+async function hmac(secret,value){const key=await crypto.subtle.importKey('raw',te.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return b64u(await crypto.subtle.sign('HMAC',key,te.encode(value)))}
+async function sessionToken(secret){const payload=`${Date.now()}.${b64u(crypto.getRandomValues(new Uint8Array(18)))}`;return `${payload}.${await hmac(secret,payload)}`}
+async function validSession(req,s){const token=cookieValue(req,COOKIE);if(!token||!s?.sessionSecret)return false;const parts=token.split('.');if(parts.length!==3)return false;const payload=`${parts[0]}.${parts[1]}`;if(Date.now()-Number(parts[0])>SESSION_MAX_AGE*1000)return false;return eq(fromB64u(parts[2]),fromB64u(await hmac(s.sessionSecret,payload)))}
+const sessionCookie=token=>`${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_MAX_AGE}`;
+const clearCookie=()=>`${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+async function hashPassword(password,saltBytes=crypto.getRandomValues(new Uint8Array(18))){const key=await crypto.subtle.importKey('raw',te.encode(password),'PBKDF2',false,['deriveBits']);const iterations=210000;const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:saltBytes,iterations},key,256);return{salt:b64u(saltBytes),hash:`pbkdf2-sha256$${iterations}$${b64u(bits)}`}}
+async function verifyPassword(password,salt,stored){if(!stored?.startsWith('pbkdf2-sha256$'))return false;const [,it,expected]=stored.split('$');const key=await crypto.subtle.importKey('raw',te.encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:fromB64u(salt),iterations:Number(it)},key,256);return eq(fromB64u(expected),new Uint8Array(bits))}
+function saneState(v){if(!v||typeof v!=='object'||Array.isArray(v))return false;const raw=JSON.stringify(v);if(raw.length>2_000_000)return false;for(const k of ['accounts','transactions','subscriptions','bills','goals'])if(k in v&&!Array.isArray(v[k]))return false;return true}
 
-    const target = new URL(incoming.pathname + incoming.search, ORIGIN);
-    const headers = new Headers(request.headers);
-    headers.set('X-Genevieve-Edge', 'cloudflare');
-    headers.set('X-Forwarded-Host', incoming.host);
+async function bootstrapPublicKey(env){if(!env.BOOTSTRAP_PUBLIC_KEY)return json({error:'Bootstrap key is not ready'},503);return new Response(env.BOOTSTRAP_PUBLIC_KEY,{headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}})}
+async function bootstrapConfigure(req,env){if(await env.GENEVIEVE_SECURE_CONFIG.get(CONFIG_KEY))return json({ok:true,configured:true,alreadyConfigured:true});const body=await readJson(req);if(!body.key||!body.iv||!body.data||!env.BOOTSTRAP_PRIVATE_KEY)return json({error:'Encrypted bootstrap payload is incomplete'},400);try{const privateKey=await crypto.subtle.importKey('pkcs8',pemBytes(env.BOOTSTRAP_PRIVATE_KEY),{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);const aesRaw=await crypto.subtle.decrypt({name:'RSA-OAEP'},privateKey,fromB64u(body.key));const aesKey=await crypto.subtle.importKey('raw',aesRaw,{name:'AES-GCM'},false,['decrypt']);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64u(body.iv)},aesKey,fromB64u(body.data));const cfg=JSON.parse(td.decode(plain));if(!cfg.databaseUrl||!cfg.sessionSecret||!cfg.setupCode)throw new Error('Required configuration fields are missing');await env.GENEVIEVE_SECURE_CONFIG.put(CONFIG_KEY,JSON.stringify(cfg));return json({ok:true,configured:true})}catch(e){return json({error:'Encrypted bootstrap failed',detail:e.message},400)}}
 
-    const upstreamRequest = new Request(target.toString(), {
-      method: request.method,
-      headers,
-      body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
-      redirect: 'manual'
-    });
+async function status(req,env){const s=await secrets(env);if(!s)return json({configured:false,authenticated:false,cloudReady:false},503);try{const sql=neon(s.databaseUrl);const rows=await sql`SELECT EXISTS(SELECT 1 FROM gm_owner WHERE id=1) AS configured`;return json({configured:!!rows[0]?.configured,authenticated:await validSession(req,s),cloudReady:true})}catch(e){return json({error:'Database is not ready',detail:e.message},500)}}
+async function setup(req,env){const s=await secrets(env);if(!s)return json({error:'Secure configuration is not ready'},503);const body=await readJson(req);if(body.setupCode!==s.setupCode)return json({error:'Setup code is incorrect'},403);if(typeof body.password!=='string'||body.password.length<6)return json({error:'Use a PIN/password of at least 6 characters'},400);try{const sql=neon(s.databaseUrl);const exists=await sql`SELECT 1 FROM gm_owner WHERE id=1`;if(exists.length)return json({error:'App is already set up'},409);const h=await hashPassword(body.password);await sql`INSERT INTO gm_owner (id,password_salt,password_hash) VALUES (1,${h.salt},${h.hash})`;await sql`INSERT INTO gm_state (owner_id) VALUES (1) ON CONFLICT (owner_id) DO NOTHING`;return json({ok:true},200,{'Set-Cookie':sessionCookie(await sessionToken(s.sessionSecret))})}catch(e){return json({error:'Setup failed',detail:e.message},500)}}
+async function login(req,env){const s=await secrets(env);if(!s)return json({error:'Secure configuration is not ready'},503);const body=await readJson(req);try{const sql=neon(s.databaseUrl);const rows=await sql`SELECT password_salt,password_hash FROM gm_owner WHERE id=1`;if(!rows.length)return json({error:'App is not set up yet'},409);if(!await verifyPassword(String(body.password||''),rows[0].password_salt,rows[0].password_hash))return json({error:'PIN/password is incorrect'},401);return json({ok:true},200,{'Set-Cookie':sessionCookie(await sessionToken(s.sessionSecret))})}catch(e){return json({error:'Login failed',detail:e.message},500)}}
+async function logout(){return json({ok:true},200,{'Set-Cookie':clearCookie()})}
+async function stateApi(req,env){const s=await secrets(env);if(!s)return json({error:'Secure configuration is not ready'},503);if(!await validSession(req,s))return json({error:'Authentication required'},401);try{const sql=neon(s.databaseUrl);if(req.method==='GET'){const rows=await sql`SELECT state,revision,updated_at FROM gm_state WHERE owner_id=1`;const row=rows[0]||{state:{},revision:0,updated_at:null};return json({state:row.state,revision:Number(row.revision),updatedAt:row.updated_at})}if(req.method==='PUT'){const body=await readJson(req);if(!saneState(body.state)||!Number.isInteger(Number(body.revision)))return json({error:'Invalid state payload'},400);const rows=await sql`UPDATE gm_state SET state=${JSON.stringify(body.state)}::jsonb, revision=revision+1, updated_at=now() WHERE owner_id=1 AND revision=${Number(body.revision)} RETURNING revision,updated_at`;if(!rows.length)return json({error:'Save conflict'},409);return json({ok:true,revision:Number(rows[0].revision),updatedAt:rows[0].updated_at})}return json({error:'Method not allowed'},405)}catch(e){return json({error:'State operation failed',detail:e.message},500)}}
+async function edgeAudit(env){const cfg=await secrets(env);let database={ok:false},origin={ok:false};if(cfg?.databaseUrl){try{const sql=neon(cfg.databaseUrl);const tables=await sql`SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('gm_owner','gm_state') ORDER BY table_name`;database={ok:tables.length===2,tables:tables.map(x=>x.table_name)}}catch(e){database={ok:false,error:e.message}}}try{const r=await fetch(`${ORIGIN}/assets/genevieve-roots-logo.webp`,{method:'HEAD'});origin={ok:r.ok,status:r.status}}catch(e){origin={ok:false,error:e.message}}return json({app:'Genevieve App — Budget App',edge:'cloudflare',secureConfig:!!cfg,database,origin,overall:!!cfg&&database.ok&&origin.ok?'pass':'attention',timestamp:new Date().toISOString()})}
+async function proxy(request){const incoming=new URL(request.url);const target=new URL(incoming.pathname+incoming.search,ORIGIN);const headers=new Headers(request.headers);headers.set('X-Genevieve-Edge','cloudflare');headers.set('X-Forwarded-Host',incoming.host);const upstream=await fetch(new Request(target,{method:request.method,headers,body:['GET','HEAD'].includes(request.method)?undefined:request.body,redirect:'manual'}));const h=new Headers(upstream.headers);h.set('X-Genevieve-Edge','cloudflare');h.set('X-Content-Type-Options','nosniff');h.set('Referrer-Policy','no-referrer');const loc=h.get('location');if(loc&&loc.startsWith(ORIGIN))h.set('location',loc.replace(ORIGIN,incoming.origin));return new Response(upstream.body,{status:upstream.status,statusText:upstream.statusText,headers:h})}
 
-    const upstream = await fetch(upstreamRequest);
-    const responseHeaders = new Headers(upstream.headers);
-    responseHeaders.set('X-Genevieve-Edge', 'cloudflare');
-    responseHeaders.set('X-Content-Type-Options', 'nosniff');
-    responseHeaders.set('Referrer-Policy', 'no-referrer');
-
-    const location = responseHeaders.get('location');
-    if (location && location.startsWith(ORIGIN)) {
-      responseHeaders.set('location', location.replace(ORIGIN, incoming.origin));
-    }
-
-    return new Response(upstream.body, {
-      status: upstream.status,
-      statusText: upstream.statusText,
-      headers: responseHeaders
-    });
-  }
-};
+export default {async fetch(request,env){const url=new URL(request.url),p=url.pathname;if(p==='/_edge/health')return json({ok:true,app:'Genevieve App — Budget App',edge:'cloudflare',secureConfig:!!(await secrets(env)),timestamp:new Date().toISOString()});if(p==='/_edge/audit')return edgeAudit(env);if(p==='/_bootstrap/public-key'&&request.method==='GET')return bootstrapPublicKey(env);if(p==='/_bootstrap/configure'&&request.method==='POST')return bootstrapConfigure(request,env);if(p==='/api/status'&&request.method==='GET')return status(request,env);if(p==='/api/setup'&&request.method==='POST')return setup(request,env);if(p==='/api/login'&&request.method==='POST')return login(request,env);if(p==='/api/logout'&&request.method==='POST')return logout();if(p==='/api/state'&&['GET','PUT'].includes(request.method))return stateApi(request,env);return proxy(request)}};
