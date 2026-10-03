@@ -1,3 +1,15 @@
+# ARCHIVED / REFERENCE ONLY — GENEVIEVE Personal Budget predecessor
+
+This repository is an older personal-budget implementation retained for historical and feature-reference purposes.
+
+**Current modern personal product:** https://github.com/tracey727/budget-calculator-personal
+
+**Separate active local-first product:** https://github.com/tracey727/My-budget
+
+Do not treat this repository as the production source and do not deploy it as a competing budget application. Its code and Git history remain intact so older local-first, sync and visual work can still be recovered if needed. The obsolete Vercel configuration has been removed; active GENEVIEVE builds use GitHub + Cloudflare + Neon where persistence is required.
+
+---
+
 # Genevieve App — Personal Budget App
 
 This repository contains the personal money, budgeting, recurring-cost and waste-review application for the Genevieve App ecosystem.
